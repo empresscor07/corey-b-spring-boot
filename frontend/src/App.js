@@ -27,7 +27,8 @@ function App({
              }) {
   const [show, setShow] = useState(false)
   const [key, setKey] = useState('events');
-
+  console.log(userName)
+  console.log(userName + "my username")
   function handleFilterEvents(window) {
     dispatch(initiateGetEventsInWindow(window))
   }

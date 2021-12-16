@@ -1,97 +1,93 @@
-import {login, register} from "../services/User";
+import {createUser, requestLogin} from "../services/User";
 import {initiateGetEvents} from "./eventMod";
-import {initiateGetNewInvites, initiateGetAnsweredInvites} from "./inviteModule";
+import {initiateGetAnsweredInvites, initiateGetNewInvites} from "./inviteModule";
 
-const LOGIN_PENDING = 'calendar/user/LOGIN_PENDING'
-const LOGIN_SUCCESS = 'calendar/user/LOGIN_SUCCESS' //backend initiated
-const LOGIN_FAILURE = 'calendar/user/LOGIN_FAILURE' //backend initiated
-const LOGOUT = 'calendar/user/LOGOUT' //user side initiated
+// Actions
+const LOGIN_REQUEST = 'user/LOGIN_REQUEST'
+const LOGIN_SUCCESS = 'user/LOGIN_SUCCESS'
+const LOGIN_FAILURE = 'user/LOGIN_FAILURE'
 
-const CREATE_USER_PENDING = 'calendar/user/CREATE_USER_PENDING'
-const CREATE_USER_SUCCESS = 'calendar/user/CREATE_USER_SUCCESS'
-const CREATE_USER_FAILURE = 'calendar/user/CREATE_USER_FAILURE'
+const CREATE_USER_REQUEST = 'user/CREATE_USER_REQUEST'
+const CREATE_USER_SUCCESS = 'user/CREATE_USER_SUCCESS'
+const CREATE_USER_FAILURE = 'user/CREATE_USER_FAILURE'
 
+const LOGOUT = 'user/LOGOUT'
 
-let users = [
-    {
-        username: 'Corey',
-        password: 'my_pass'
-    },
-    {
-        username: 'Kyla',
-        password: 'my_pass'
-    }
-]
-
+// Reducer
 const initialState = {
-    users: users,
-    userName: '',
-    isLoggedIn: false,
+    loginPending: false,
     loginFailure: false,
-    createUserFailed: false
+    isLoggedIn: false,
+    createUserPending: false,
+    createUserFailure: false,
+    userName: ''
 }
 
 export default function reducer(state = initialState, action) {
     switch (action.type) {
-        case LOGIN_PENDING:
+        case LOGIN_REQUEST:
             return {
                 ...state,
-                isLoggedIn: false,
-                loginFailure: false
+                loginPending: true,
+                loginFailure: false,
+                isLoggedIn: false
             }
+
         case LOGIN_SUCCESS:
             return {
                 ...state,
-                isLoggedIn: true,
+                loginPending: false,
                 loginFailure: false,
+                isLoggedIn: true,
+                postImageFileFailure: false,
                 userName: action.userName
-
-            };
+            }
 
         case LOGIN_FAILURE:
             return {
                 ...state,
-                isLoggedIn: false,
-                loginFailure: true
-            };
-
-        case CREATE_USER_PENDING:
-            return {
-                ...state,
-                createUserFailed: false,
+                loginPending: false,
+                loginFailure: true,
+                isLoggedIn: false
             }
+
+        case CREATE_USER_REQUEST:
+            return {
+                // deconstruct state
+                ...state,
+                // set one value to true
+                createUserPending: true,
+                createUserFailure: false
+            };
 
         case CREATE_USER_SUCCESS:
             return {
                 ...state,
-                createUserFailed: false,
-                users: action.users
+                createUserPending: false,
+                createUserFailure: false,
             };
 
         case CREATE_USER_FAILURE:
-            console.log('Create User Failed')
             return {
                 ...state,
-                createUserFailed: true
+                createUserPending: false,
+                createUserFailure: true
             };
 
         case LOGOUT:
-            console.log('Logged Out')
             return {
                 ...state,
-                isLoggedIn: false,
-                userName: action.userName
-            };
+                isLoggedIn: false
+            }
 
         default:
-            return state;
+            return state
     }
 }
 
 // Action Creators
-
-export function loginPending() {
-    return {type: LOGIN_PENDING}
+export function loginRequest() {
+    return {type: LOGIN_REQUEST}
 }
 
 export function loginSuccess(userName) {
@@ -105,17 +101,12 @@ export function loginFailure() {
     return {type: LOGIN_FAILURE}
 }
 
-export function createUserPending() {
-    return {type: CREATE_USER_PENDING}
+export function createUserRequest() {
+    return {type: CREATE_USER_REQUEST}
 }
 
-export function createUserSuccess(user, usersList) {
-    console.log(user.username)
-
-    return {
-        type: CREATE_USER_SUCCESS,
-        users: [...usersList, user]
-    }
+export function createUserSuccess() {
+    return {type: CREATE_USER_SUCCESS}
 }
 
 export function createUserFailure() {
@@ -123,41 +114,38 @@ export function createUserFailure() {
 }
 
 export function logout() {
-    return {
-        type: LOGOUT,
-        userName: ''
-    }
+    return {type: LOGOUT}
 }
 
 // Side Effects
-
 export function initiateLogin(credentials) {
-    return function loginDispatcher(dispatch, getState) {
-        dispatch(loginPending())
-        console.log(getState().user.users)
-        login(credentials, getState().user.users).then(
-            () => {
-                dispatch(loginSuccess(credentials.username))
-                dispatch(initiateGetEvents())
-                dispatch(initiateGetNewInvites())
-                console.log(('getting all invites'))
-                dispatch(initiateGetAnsweredInvites())
-            },
-            () => dispatch(loginFailure())
-        )
+    console.log(credentials)
+    return function login(dispatch) {
+        dispatch(loginRequest())
+        requestLogin(credentials).then(response => {
+            if (!response.ok) {
+                dispatch(loginFailure())
+                return
+            }
+            console.log(response);
+            dispatch(loginSuccess(credentials.username))
+            dispatch(initiateGetEvents())
+            dispatch(initiateGetNewInvites())
+            dispatch(initiateGetAnsweredInvites())
+        }, () => dispatch(loginFailure()))
     }
 }
 
-export function initiateRegister(userInfo) {
-    return function createUser(dispatch, getState) {
-        dispatch(createUserPending())
-        console.log(getState().user.users)
-        register(userInfo, getState().user.users).then(
-            () => {
-                dispatch(createUserSuccess(userInfo, getState().user.users))
-                dispatch(initiateLogin(userInfo))
-            },
-            () => dispatch(createUserFailure())
-        )
+export function initiateRegister(credentials) {
+    return function register(dispatch) {
+        dispatch(createUserRequest())
+        createUser(credentials).then(response => {
+            if (!response.ok) {
+                dispatch(createUserFailure())
+                return
+            }
+            dispatch(createUserSuccess())
+            dispatch(initiateLogin(credentials))
+        })
     }
 }

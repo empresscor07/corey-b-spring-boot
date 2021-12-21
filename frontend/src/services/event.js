@@ -1,66 +1,54 @@
-export function getAllEvents(user, events) {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            let myHostedEvents = [];
-            if (events.length > 0) {
-                events.forEach(event => {
-                    if (event.host === user) {
-                        myHostedEvents.push(event)
-                    }
-                })
-                resolve(myHostedEvents)
-            } else {
-                reject()
-            }
+import config from "../config";
 
-        }, 250)
+export function getAllEvents() {
+    return fetch(`${config.eventAPI}/all`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
 }
 
-export function createEvent(user, newEvent, events) {
-    console.log(newEvent)
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            if (events.length > 0) {
-                let updatedEvents = [...events, newEvent]
-                console.log(updatedEvents)
-                if (updatedEvents) {
-                    console.log('updated events in service!!')
-                    resolve(updatedEvents)
-                } else {
-                    console.log('reject update in service')
-                    reject()
-                }
-            } else {
-                let updatedEvents = [newEvent]
-                resolve(updatedEvents)
-            }
-
-        }, 250)
+export function createEvent(event) {
+    return fetch(`${config.eventAPI}/add`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(event)
     })
 }
 
-export function editEvent(newEvent, events) {
-    console.log(newEvent)
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            let eventList = []
-            events.forEach(event => {
-                if (event.id === newEvent.id) {
-                    eventList = events.filter(oneEvent => oneEvent.id !== newEvent.id)
-                }
-
-            })
-            if (eventList) {
-                let updatedEvents = [...eventList, newEvent]
-                console.log(updatedEvents)
-                resolve(updatedEvents)
-            } else {
-                reject()
-            }
-        }, 250)
+export function editEvent(event) {
+    console.log(event)
+    return fetch(`${config.eventAPI}/edit`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(event)
     })
 }
+
+
+// return new Promise((resolve, reject) => {
+//     setTimeout(() => {
+//         let eventList = []
+//         events.forEach(event => {
+//             if (event.id === newEvent.id) {
+//                 eventList = events.filter(oneEvent => oneEvent.id !== newEvent.id)
+//             }
+//
+//         })
+//         if (eventList) {
+//             let updatedEvents = [...eventList, newEvent]
+//             console.log(updatedEvents)
+//             resolve(updatedEvents)
+//         } else {
+//             reject()
+//         }
+//     }, 250)
+// })
 
 export function deleteEvent(eventToDelete, events) {
     console.log(eventToDelete)

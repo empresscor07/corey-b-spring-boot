@@ -20,18 +20,21 @@ function Event({event, deleteEvent, handleEditEvent}) {
     const [edit, setEdit] = useState(false)
     const handleCloseDetails = () => setShowDetails(false);
     const handleShowDetails = () => setShowDetails(true);
-    const rawDate = event.startTime
+
+    // convert backend date to javascript date object
+    const rawDate = new Date(event.startTime)
+    const rawEnd = new Date(event.endTime)
     const date = (rawDate.getMonth()+1) + '/' + rawDate.getDate() + '/' + rawDate.getFullYear()
-    const [startTime, setStartTime] = useState(event.startTime)
-    const [endTime, setEndTime] = useState(event.endTime)
+    const [startTime, setStartTime] = useState(rawDate)
+    const [endTime, setEndTime] = useState(rawEnd)
     const [name, setName] = useState(event.name)
     const [description, setDescription] = useState(event.description)
     const [location, setLocation] = useState(event.location)
     const [invitees, setInvitees] = useState(event.invitees)
     let amOrPmStart = 'am'
-    let timeStart = event.startTime.getHours()
+    let timeStart = rawDate.getHours()
     let amOrPmEnd = 'am'
-    let timeEnd = event.endTime.getHours()
+    let timeEnd = rawEnd.getHours()
 
     if (timeStart > 12) {
         amOrPmStart = 'pm'
@@ -43,16 +46,24 @@ function Event({event, deleteEvent, handleEditEvent}) {
         timeEnd = timeEnd - 12
     }
 
-    let minString
-    const minutes = event.startTime.getMinutes()
+    let minStartString
+    const minutes = rawDate.getMinutes()
     if (minutes < 10) {
-        minString = '0' + minutes
+        minStartString = '0' + minutes
     } else {
-        minString = minutes
+        minStartString = minutes
     }
 
-    const start_time = timeStart + ':' + minString + amOrPmStart
-    const end_time = timeEnd + ':' + event.endTime.getMinutes() + amOrPmEnd
+    let minEndString
+    const minutesEnd = rawEnd.getMinutes()
+    if (minutesEnd < 10) {
+        minEndString = '0' + minutes
+    } else {
+        minEndString = minutesEnd
+    }
+
+    const start_time = timeStart + ':' + minStartString + amOrPmStart
+    const end_time = timeEnd + ':' + minEndString + amOrPmEnd
 
     function handleEditShow() {
         setEdit(true)

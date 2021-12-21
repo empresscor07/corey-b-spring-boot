@@ -1,4 +1,6 @@
 import {getAllEvents, createEvent, editEvent, deleteEvent, getEventsInWindow} from "../services/event";
+import {createUser} from "../services/User";
+import {createUserFailure, createUserRequest, createUserSuccess, initiateLogin} from "./UserMod";
 
 const GET_EVENTS_SUCCESS = 'calendar/event/GET_EVENTS_SUCCESS'
 const GET_EVENTS_FAILURE = 'calendar/event/GET_EVENTS_FAILURE'
@@ -11,54 +13,10 @@ const DELETE_EVENT_FAILURE = 'calendar/event/DELETE_EVENT_FAILURE'
 const GET_EVENTS_IN_WINDOW_SUCCESS = 'calendar/event/GET_EVENTS_IN_WINDOW_SUCCESS'
 const GET_EVENTS_IN_WINDOW_FAILURE = 'calendar/event/GET_EVENTS_IN_WINDOW_FAILURE'
 
-let testEvents = [
-    {
-        id: 0,
-        host: 'Corey',
-        startTime: new Date('2021-12-17T14:24:00'),
-        endTime: new Date('2021-12-17T16:24:00'),
-        name: 'Decorate the Tree',
-        description: 'Put up lots of twinkly lights and ornaments with my family',
-        location: 'Duluth',
-        invitees: ['Sam', 'Kyla', 'Julian']
-
-    },
-    {
-        id: 1,
-        host: 'Kyla',
-        startTime: new Date('2021-12-19T05:24:00'),
-        endTime: new Date('2021-12-19T08:24:00'),
-        name: 'Family Christmas',
-        description: 'Presents galore, enough said!',
-        location: 'Home',
-        invitees: ['Sam', 'Corey', 'Julian', 'Kerrie', 'Pam']
-    },
-    {
-        id: 2,
-        host: 'Kyla',
-        startTime: new Date('2021-12-25T05:24:00'),
-        endTime: new Date('2021-12-25T08:24:00'),
-        name: 'Christmas Day Celebration',
-        description: 'Stocking and presents from Santa',
-        location: 'Home',
-        invitees: ['Sam', 'Corey', 'Julian', 'Kerrie', 'Pam']
-    },
-    {
-        id: 3,
-        host: 'Corey',
-        startTime: new Date('2021-12-25T05:24:00'),
-        endTime: new Date('2021-12-25T08:24:00'),
-        name: 'Christmas Day Celebration',
-        description: 'Stocking and presents from Santa',
-        location: 'Home',
-        invitees: ['Sam', 'Kyla', 'Julian', 'Kerrie', 'Pam']
-    }
-]
-
 //Reducer
 
 const initialState = {
-    events : testEvents,
+    events : [],
     myEvents: [],
     getEventsFailed: false,
     createEventFailed: false,
@@ -82,8 +40,7 @@ export default function reducer(state = initialState, action) {
         case CREATE_EVENT_SUCCESS:
             return {
                 ...state,
-                createEventFailed: false,
-                events: action.events
+                createEventFailed: false
             }
         case CREATE_EVENT_FAILURE:
             return {
@@ -144,10 +101,9 @@ export function getEventsFailure() {
     return {type: GET_EVENTS_FAILURE}
 }
 
-export function createEventSuccess(updatedEvents) {
+export function createEventSuccess() {
     return {
-        type: CREATE_EVENT_SUCCESS,
-        events: updatedEvents
+        type: CREATE_EVENT_SUCCESS
     }
 }
 
@@ -203,23 +159,57 @@ export function getEventsInWindowFailure() {
 export function initiateGetEvents() {
     return function getEventsDispatcher(dispatch, getState) {
         console.log(getState().user.userName)
-        getAllEvents(getState().user.userName, getState().event.events).then(
-            myHostedEvents => dispatch(getEventsSuccess(getState().event.events, myHostedEvents)),
-            () => dispatch(getEventsFailure())
-        )
+        getAllEvents().then(response => {
+            if (!response.ok) {
+                dispatch(getEventsFailure())
+                return
+            }
+            response.json().then(
+                json => {
+                    let myEvents = []
+                    json.forEach(event => {
+                        if (event.host === getState().user.userName) {
+                            myEvents.push(event)
+                        }
+                    })
+                    dispatch(getEventsSuccess(json, myEvents))
+            }, () => dispatch(getEventsFailure()))
+        }, () => dispatch(getEventsFailure()))
+    }
+}
+
+export function initiateRegister(credentials) {
+    return function register(dispatch) {
+        dispatch(createUserRequest())
+        createUser(credentials).then(response => {
+            if (!response.ok) {
+                dispatch(createUserFailure())
+                return
+            }
+            dispatch(createUserSuccess())
+            dispatch(initiateLogin(credentials))
+        })
     }
 }
 
 export function initiateCreateNewEvent(newEvent) {
     return function createEventDispatcher(dispatch, getState) {
-        createEvent(getState().user.userName, newEvent, getState().event.events).then(
-            updatedEvents => {
-                console.log(updatedEvents)
-                dispatch(createEventSuccess(updatedEvents))
-                dispatch(initiateGetEvents())
-            },
-            () => dispatch(createEventFailure())
-        )
+        createEvent(newEvent).then(
+            response => {
+                if (!response.ok) {
+                    dispatch(createEventFailure())
+                    return
+                }
+
+                response.text().then(text => {
+                    if (text !== "Created") {
+                        dispatch(createEventFailure())
+                        return
+                    }
+                    dispatch(createEventSuccess())
+                    dispatch(initiateGetEvents())
+                }, () => dispatch(createEventFailure()))
+            }, () => dispatch(createEventFailure()))
     }
 }
 

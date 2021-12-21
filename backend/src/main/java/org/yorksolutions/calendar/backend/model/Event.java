@@ -3,11 +3,9 @@ package org.yorksolutions.calendar.backend.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity //defines the class as something that Spring will use to store in a database
 @JsonIgnoreProperties
@@ -38,7 +36,8 @@ public class Event {
     String location;
 
     @JsonProperty
-    String invitees;
+    @ElementCollection
+    public List<String> invitees;
 
     public Long getId() {
         return id;
@@ -92,11 +91,8 @@ public class Event {
         this.location = location;
     }
 
-    public String getInvitees() {
+    public List<String> getInvitees() {
         return invitees;
     }
 
-    public void setInvitees(String invitees) {
-        this.invitees = invitees;
-    }
 }

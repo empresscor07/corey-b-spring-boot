@@ -36,7 +36,7 @@ const CREATE_NEW_ANSWERED_INVITE_FAILURE = 'calendar/invite/CREATE_NEW_ANSWERED_
 
 const initialState = {
     newInvites: [],
-    answeredInviteList: existingInvites,
+    answeredInviteList: [],
     myAnsweredInvites: [],
     getInvitesFailed: false,
     getAnsweredInvitesFailed: false,

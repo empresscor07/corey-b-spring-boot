@@ -12,12 +12,13 @@ function Invite(props) {
     const handleShowDetails = () => setShowDetails(true);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
-    const rawDate = props.invite.startTime
+    const rawDate = new Date(props.invite.startTime)
+    const rawEnd = new Date(props.invite.endTime)
     const date = (rawDate.getMonth()+1) + '/' + rawDate.getDate() + '/' + rawDate.getFullYear()
     let amOrPmStart = 'am'
-    let timeStart = props.invite.startTime.getHours()
+    let timeStart = rawDate.getHours()
     let amOrPmEnd = 'am'
-    let timeEnd = props.invite.endTime.getHours()
+    let timeEnd = rawEnd.getHours()
 
     if (timeStart > 12) {
         amOrPmStart = 'pm'
@@ -29,8 +30,24 @@ function Invite(props) {
         timeEnd = timeEnd - 12
     }
 
-    const start_time = timeStart + ':' + props.invite.startTime.getMinutes() + amOrPmStart
-    const end_time = timeEnd + ':' + props.invite.endTime.getMinutes() + amOrPmEnd
+    let minStartString
+    const minutes = rawDate.getMinutes()
+    if (minutes < 10) {
+        minStartString = '0' + minutes
+    } else {
+        minStartString = minutes
+    }
+
+    let minEndString
+    const minutesEnd = rawEnd.getMinutes()
+    if (minutesEnd < 10) {
+        minEndString = '0' + minutes
+    } else {
+        minEndString = minutesEnd
+    }
+
+    const start_time = timeStart + ':' + minStartString + amOrPmStart
+    const end_time = timeEnd + ':' + minEndString + amOrPmEnd
 
     return (
         <>

@@ -16,7 +16,6 @@ function NewEvent({showNewEvent, setShowNewEvent, userName, handleNewEvent}) {
         const invitees_string = document.getElementById('invitees').value
 
         handleNewEvent({
-            id: Math.random() * 999999 + 100,
             host: userName,
             name: name,
             startTime: new Date(startTime),

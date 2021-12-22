@@ -1,6 +1,4 @@
 import {getAllEvents, createEvent, editEvent, deleteEvent, getEventsInWindow} from "../services/event";
-import {createUser} from "../services/User";
-import {createUserFailure, createUserRequest, createUserSuccess, initiateLogin} from "./UserMod";
 
 const GET_EVENTS_SUCCESS = 'calendar/event/GET_EVENTS_SUCCESS'
 const GET_EVENTS_FAILURE = 'calendar/event/GET_EVENTS_FAILURE'

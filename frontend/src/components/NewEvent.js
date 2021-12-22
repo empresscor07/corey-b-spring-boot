@@ -1,8 +1,20 @@
 import {Button, Form, Modal} from "react-bootstrap";
+import Invitee from "./Invitee";
+import {useState} from "react";
 
 function NewEvent({showNewEvent, setShowNewEvent, userName, handleNewEvent}) {
+
+    const [invitees, setInvitees] = useState([])
     function handleClose() {
         setShowNewEvent(false)
+    }
+
+    function handleInviteesChange(e) {
+        setInvitees([...invitees, e.target.value])
+    }
+
+    function handleDeleteInvitees() {
+        setInvitees([])
     }
 
     function handleSubmit(event) {
@@ -13,7 +25,6 @@ function NewEvent({showNewEvent, setShowNewEvent, userName, handleNewEvent}) {
         const endTime = document.getElementById('endTime').value
         const description = document.getElementById('description').value
         const location = document.getElementById('location').value
-        const invitees_string = document.getElementById('invitees').value
 
         handleNewEvent({
             host: userName,
@@ -22,7 +33,7 @@ function NewEvent({showNewEvent, setShowNewEvent, userName, handleNewEvent}) {
             endTime: new Date(endTime),
             description: description,
             location: location,
-            invitees: invitees_string.split(', ')
+            invitees: invitees
         })
     }
 
@@ -63,7 +74,14 @@ function NewEvent({showNewEvent, setShowNewEvent, userName, handleNewEvent}) {
                 </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Label>Invitees</Form.Label>
-                    <Form.Select id='invitees' aria-label="Select Invitee">
+                    {
+                        invitees?
+                            invitees.map(invitee => <ul>
+                                <Invitee invitee={invitee} deleteInvitee={handleDeleteInvitees} />
+                            </ul>):
+                            <h4>No current Invitees</h4>
+                    }
+                    <Form.Select onChange={handleInviteesChange} id='invitees' aria-label="Select Invitee">
                         <option>Open this select menu</option>
                         <option value="Sam">Sam</option>
                         <option value="Kerrie">Kerrie</option>

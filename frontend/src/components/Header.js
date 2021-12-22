@@ -7,7 +7,7 @@ import ErrorToast from "./ErrorToast";
 import {useEffect, useState} from "react";
 import MainErrorToasts from "./MainErrorToasts";
 
-function Header({dispatch, handleLogoutRequest, userName, show, setShow, handleShow}) {
+function Header({dispatch, handleLogoutRequest, userName, show, setShow, handleShow, han}) {
     console.log('My username ' + userName)
     function handleNewEvent(newEvent) {
         dispatch(initiateCreateNewEvent(newEvent))

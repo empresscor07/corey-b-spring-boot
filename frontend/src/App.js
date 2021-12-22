@@ -79,6 +79,7 @@ function App({
                     handleShow={handleShow}
                     dispatch={dispatch}
                     initiateCreateNewEvent={initiateCreateNewEvent}
+                    handle
                 />
 
                 <div className="app-container">

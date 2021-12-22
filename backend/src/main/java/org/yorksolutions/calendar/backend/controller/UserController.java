@@ -40,22 +40,33 @@ public class UserController {
         return "success";
     }
 
+//    @CrossOrigin
+//    @PostMapping("/login2")
+//    ResponseEntity<?> login2(@RequestBody User unverifiedUser) {
+//        List<User> userList = (List<User>) userRepository.findAll();
+//        userList = userList
+//                .stream()
+//                .filter(u -> Objects.equals(u.getUsername(), unverifiedUser.getUsername()))
+//                .collect(Collectors.toList());
+//        if (!userList.isEmpty()) {
+//            User user = userList.get(0);
+//            if (Objects.equals(user.getPassword(), unverifiedUser.getPassword())) {
+//                return new ResponseEntity<>("message: success", HttpStatus.OK);
+//            }
+//            return new ResponseEntity<>("message: invalid", HttpStatus.UNAUTHORIZED);
+//        }
+//        return new ResponseEntity<>("message: invalid", HttpStatus.UNAUTHORIZED);
+//    }
+
     @CrossOrigin
     @PostMapping("/login")
-    ResponseEntity<?> login(@RequestBody User unverifiedUser) {
-        List<User> userList = (List<User>) userRepository.findAll();
-        userList = userList
-                .stream()
-                .filter(u -> Objects.equals(u.getUsername(), unverifiedUser.getUsername()))
-                .collect(Collectors.toList());
-        if (!userList.isEmpty()) {
-            User user = userList.get(0);
-            if (Objects.equals(user.getPassword(), unverifiedUser.getPassword())) {
-                return new ResponseEntity<>("message: success", HttpStatus.OK);
-            }
-            return new ResponseEntity<>("message: invalid", HttpStatus.UNAUTHORIZED);
+    String login(@RequestBody User user) {
+        List<User> existingUser = userRepository.findByUsernameAndPassword(user.getUsername(), user.getPassword());
+        if (existingUser.isEmpty()) {
+            return "Failed";
+        } else {
+            return "Success";
         }
-        return new ResponseEntity<>("message: invalid", HttpStatus.UNAUTHORIZED);
     }
 }
 

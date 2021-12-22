@@ -178,20 +178,6 @@ export function initiateGetEvents() {
     }
 }
 
-export function initiateRegister(credentials) {
-    return function register(dispatch) {
-        dispatch(createUserRequest())
-        createUser(credentials).then(response => {
-            if (!response.ok) {
-                dispatch(createUserFailure())
-                return
-            }
-            dispatch(createUserSuccess())
-            dispatch(initiateLogin(credentials))
-        })
-    }
-}
-
 export function initiateCreateNewEvent(newEvent) {
     return function createEventDispatcher(dispatch, getState) {
         createEvent(newEvent).then(
@@ -215,13 +201,22 @@ export function initiateCreateNewEvent(newEvent) {
 
 export function initiateEditEvent(editedEvent) {
     return function editEventDispatcher(dispatch, getState) {
-        editEvent(editedEvent, getState().event.events).then(
-            updatedEvents => {
-                console.log(updatedEvents)
-                dispatch(editEventSuccess(updatedEvents))
-                dispatch(initiateGetEvents())
-            },
-            () => dispatch(editEventFailure())
+        editEvent(editedEvent).then(
+                response => {
+                    if (!response.ok) {
+                        dispatch(editEventFailure())
+                        return
+                    }
+
+                    response.text().then(text => {
+                        if (text !== "Updated") {
+                            dispatch(editEventFailure())
+                            return
+                        }
+                        dispatch(editEventSuccess())
+                        dispatch(initiateGetEvents())
+                    }, () => dispatch(editEventFailure()))
+                }, () => dispatch(editEventFailure())
         )
     }
 }
@@ -229,23 +224,44 @@ export function initiateEditEvent(editedEvent) {
 export function initiateDeleteEvent(eventToDelete) {
     console.log('initiateDelete running')
     return function deleteEventDispatcher(dispatch, getState) {
-        deleteEvent(eventToDelete, getState().event.events).then(
-            updatedEvents => {
-                console.log(updatedEvents)
-                dispatch(deleteEventSuccess(updatedEvents))
-                dispatch(initiateGetEvents())
-            },
-            () => dispatch(deleteEventFailure())
-        )
+        deleteEvent(eventToDelete).then(
+            response => {
+                if (!response.ok) {
+                    dispatch(deleteEventFailure())
+                    return
+                }
+
+                response.text().then(text => {
+                    if (text !== "Deleted") {
+                        dispatch(deleteEventFailure())
+                        return
+                    }
+                    dispatch(deleteEventSuccess())
+                    dispatch(initiateGetEvents())
+                }, () => dispatch(deleteEventFailure()))
+            }, () => dispatch(deleteEventFailure()))
     }
 }
 
 export function initiateGetEventsInWindow(window) {
     return function getEventsInWindowDispatcher(dispatch, getState) {
-        getEventsInWindow(window, getState().event.myEvents).then(
-            myHostedEvents => dispatch(getEventsSuccess(getState().event.events, myHostedEvents)),
-            () => dispatch(getEventsFailure())
-        )
+        getEventsInWindow(window).then(
+            response => {
+                if (!response.ok) {
+                    dispatch(getEventsInWindowFailure())
+                    return
+                }
+
+                response.json().then(json => {
+                    let myEvents = []
+                    json.forEach(event => {
+                        if (event.host === getState().user.userName) {
+                            myEvents.push(event)
+                        }
+                    })
+                    dispatch(getEventsInWindowSuccess(myEvents))
+                }, () => dispatch(getEventsInWindowFailure()))
+            }, () => dispatch(getEventsInWindowFailure()))
     }
 }
 

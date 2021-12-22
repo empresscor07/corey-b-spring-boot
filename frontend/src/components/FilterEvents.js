@@ -2,14 +2,14 @@ import {Button, Form, Modal} from "react-bootstrap";
 import {useState} from "react";
 
 export default function FilterEvents({showFilter, handleFilterClose, handleFilterEvents}) {
-    const [window_start, setStartWindow] = useState('');
-    const [window_end, setEndWindow] = useState('');
+    const [startDate, setStartWindow] = useState('');
+    const [endDate, setEndWindow] = useState('');
 
     function handleFilterSubmit(event) {
         event.preventDefault()
         // console.log(window_start, window_end)
         handleFilterClose()
-        handleFilterEvents({window_start, window_end})
+        handleFilterEvents({startDate, endDate})
     }
 
     function handleStartWindowChange(event) {

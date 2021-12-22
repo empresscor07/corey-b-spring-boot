@@ -71,7 +71,7 @@ function Invite(props) {
                         <Button className='mt-1 mx-1' variant="info" onClick={handleShowDetails}>
                             Details
                         </Button>
-                        <Button className='mt-1 mx-1' variant="primary" onClick={handleShow}>
+                        <Button className='mt-1 mx-1' variant="primary" onClick={handleShow} disabled={true}>
                             RSVP
                         </Button>
 

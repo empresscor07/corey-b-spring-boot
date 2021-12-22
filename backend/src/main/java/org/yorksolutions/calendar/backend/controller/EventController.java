@@ -2,14 +2,15 @@ package org.yorksolutions.calendar.backend.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.yorksolutions.calendar.backend.model.Event;
+import org.yorksolutions.calendar.backend.model.Window;
 import org.yorksolutions.calendar.backend.repository.EventRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequestMapping("/event") //sets the base path this api will use
@@ -68,20 +69,10 @@ public class EventController {
     }
 
     @CrossOrigin
-    @PutMapping("/invitees/{id}")
-    String addInvitee(@PathVariable("id") Long id, @RequestBody Event event) {
-        Optional<Event> optional = eventRepository.findById(id);
-
-        if (optional.isEmpty()){
-            return "Failed";
-        }
-        Event oldEvent = optional.get();
-        for (String invitee : event.invitees) {
-            oldEvent.invitees.add(invitee);
-            eventRepository.save(oldEvent);
-        }
-
-
-        return "success";
+    @PostMapping("/window")
+    String getEventsInWindow(@RequestBody String body) throws JsonProcessingException {
+        Window window = objectMapper.readValue(body, Window.class);
+        List<Event> eventsInWindow = eventRepository.findEventByStartTimeAfterAndEndTimeBefore(window.getStartDate(), window.getEndDate());
+        return objectMapper.writeValueAsString(eventsInWindow);
     }
 }

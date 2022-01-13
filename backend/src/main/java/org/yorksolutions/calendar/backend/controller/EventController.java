@@ -17,6 +17,9 @@ import java.util.Optional;
 @RestController //controller is telling spring we do have endpoints we want to respond to
 public class EventController {
 
+    // if we take out autowired it no longer has access to the main repository,
+    // nothing is found in this new repository and nothing is saved to the main repository
+    // error: Cannot invoke "org.yorksolutions.calendar.backend.repository.EventRepository.findAll()" because "this.eventRepository" is null
     @Autowired //we want to get the one that spring has already created -
     // so spring please give me the product repository you are managing and put it in this variable
     EventRepository eventRepository; //in order to get items from database need to have access to the pantry repository
